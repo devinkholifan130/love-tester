@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Love Tester</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg-1: #FFDEE9;
+      --bg-2: #B5FFFC;
+      --card: rgba(255,255,255,0.08);
+      --glass: rgba(255,255,255,0.12);
+      --accent: #FF6B8A;
+      --accent-2: #8A4DFF;
+      --muted: rgba(255,255,255,0.75);
+      --glass-border: rgba(255,255,255,0.14);
+      color-scheme: light;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial}
+    body{
+      background: linear-gradient(135deg,var(--bg-1),var(--bg-2));
+      display:flex;align-items:center;justify-content:center;padding:32px;
+    }
+
+    .container{
+      width:100%;max-width:920px;background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      border-radius:18px;padding:28px;box-shadow:0 10px 30px rgba(16,24,40,0.12);backdrop-filter: blur(8px);
+      border: 1px solid var(--glass-border);
+      position:relative;overflow:hidden;
+    }
+
+    .header{
+      display:flex;gap:16px;align-items:center;margin-bottom:18px;
+    }
+    .logo{
+      display:inline-grid;place-items:center;width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:white;font-weight:800;font-size:20px;box-shadow:0 6px 18px rgba(139,92,246,0.18);
+    }
+    h1{margin:0;font-size:20px;color:#021024}
+    p.lead{margin:0;color:rgba(0,6,16,0.6);font-size:13px}
+
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:20px}
+    @media (max-width:880px){.grid{grid-template-columns:1fr}.header{gap:12px}}
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.5));padding:18px;border-radius:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.4);
+    }
+
+    form .row{display:flex;gap:12px;margin-bottom:12px}
+    label{display:block;font-size:13px;color:#062133;margin-bottom:6px;font-weight:600}
+    input[type=text], select{
+      width:100%;padding:12px;border-radius:10px;border:1px solid rgba(2,8,23,0.06);outline:none;font-size:14px;background:transparent;
+      box-shadow:0 3px 10px rgba(2,8,23,0.03);
+    }
+
+    .options{display:flex;gap:8px;flex-wrap:wrap}
+    .option{
+      padding:8px 12px;border-radius:999px;background:rgba(2,8,23,0.03);cursor:pointer;user-select:none;border:1px solid transparent;font-weight:600;font-size:13px
+    }
+    .option.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;border-color:rgba(255,255,255,0.06);box-shadow:0 6px 18px rgba(138,77,255,0.12)}
+
+    .actions{display:flex;gap:10px;align-items:center;margin-top:10px}
+    button.primary{
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;padding:10px 14px;border-radius:12px;border:0;font-weight:700;cursor:pointer;box-shadow:0 10px 20px rgba(138,77,255,0.12);
+    }
+    button.ghost{background:transparent;border:1px solid rgba(2,8,23,0.06);padding:10px 12px;border-radius:12px;cursor:pointer}
+
+    /* Result panel */
+    .result-panel{padding:18px;border-radius:12px;display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;text-align:center}
+    .big-percent{font-size:56px;font-weight:800;line-height:1;color:#18181B}
+    .result-msg{font-weight:600;color:#062133}
+
+    .meter{width:100%;height:16px;background:linear-gradient(180deg, rgba(2,8,23,0.04), rgba(2,8,23,0.02));border-radius:10px;overflow:hidden}
+    .meter > i{display:block;height:100%;width:0;border-radius:10px;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width 1.1s cubic-bezier(.16,.84,.44,1)}
+
+    .heart-bg{position:absolute;right:-80px;top:-80px;opacity:0.12;transform:rotate(12deg);font-size:240px;pointer-events:none}
+
+    footer.small{font-size:12px;color:rgba(2,8,23,0.45);text-align:center;margin-top:12px}
+
+    /* little flourish */
+    .tiny-hint{font-size:12px;color:rgba(2,8,23,0.45)}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="heart-bg">❤</div>
+    <div class="header">
+      <div class="logo">LT</div>
+      <div>
+        <h1>Love Tester</h1>
+        <p class="lead">Tes kecocokan nama — cepat, fun, dan terlihat rapi. Cocok untuk bersenang-senang!</p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <form id="loveForm" autocomplete="off">
+          <div class="row">
+            <div style="flex:1">
+              <label for="maleName">Nama (Laki-Laki)</label>
+              <input id="maleName" type="text" required>
+            </div>
+            <div style="flex:1">
+              <label for="femaleName">Nama (Perempuan)</label>
+              <input id="femaleName" type="text" required>
+            </div>
+          </div>
+
+          <div style="margin-bottom:10px">
+            <label>Hubungan</label>
+            <div class="options" role="list">
+              <div class="option active" data-val="pacar" role="listitem">Pacar</div>
+              <div class="option" data-val="kakak-adik" role="listitem">Kakak &amp; Adik</div>
+              <div class="option" data-val="teman" role="listitem">Teman (Laki-Laki & Perempuan)</div>
+            </div>
+            <p class="tiny-hint" style="margin-top:8px">Pilih opsi yang paling cocok. Opsi mempengaruhi interpretasi hasil (hanya untuk fun).</p>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="primary">Tes Kecocokan</button>
+            <button type="button" id="resetBtn" class="ghost">Reset</button>
+            <div style="flex:1" aria-hidden="true"></div>
+            <div class="tiny-hint">Desain modern • Untuk hiburan</div>
+          </div>
+        </form>
+        <footer class="small">Masukkan nama asli atau imajinatif — ini hanya untuk bersenang-senang.</footer>
+      </div>
+
+      <div class="card result-panel" id="resultPanel">
+        <div style="width:100%">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="text-align:left">
+              <div style="font-size:13px;color:rgba(2,8,23,0.55);">Hasil</div>
+              <div id="pairLabel" style="font-weight:700;color:#062133">-</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:12px;color:rgba(2,8,23,0.45)">Status</div>
+              <div id="relationLabel" style="font-weight:700">-</div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <div class="big-percent" id="percent">--%</div>
+            <div class="meter" aria-hidden="true"><i id="meterFill"></i></div>
+            <div id="message" class="result-msg">Ayo mulai tes — masukkan nama di kiri.</div>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:12px;justify-content:center">
+            <button id="copyBtn" class="ghost">Salin Hasil</button>
+            <button id="shareBtn" class="ghost">Bagikan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Utilities
+    const $ = (s) => document.querySelector(s);
+    const $$ = (s) => Array.from(document.querySelectorAll(s));
+
+    // Elements
+    const form = $('#loveForm');
+    const maleInput = $('#maleName');
+    const femaleInput = $('#femaleName');
+    const options = $$('.option');
+    const resultPanel = $('#resultPanel');
+    const percentEl = $('#percent');
+    const meterFill = $('#meterFill');
+    const messageEl = $('#message');
+    const pairLabel = $('#pairLabel');
+    const relationLabel = $('#relationLabel');
+    const resetBtn = $('#resetBtn');
+    const copyBtn = $('#copyBtn');
+    const shareBtn = $('#shareBtn');
+
+    let chosenRelation = 'pacar';
+
+    // Option click handling
+    options.forEach(opt => {
+      opt.addEventListener('click', () => {
+        options.forEach(o=>o.classList.remove('active'));
+        opt.classList.add('active');
+        chosenRelation = opt.dataset.val;
+      });
+    });
+
+    // Deterministic but playful algorithm
+    function nameScore(name){
+      if(!name) return 0;
+      name = name.trim().toLowerCase();
+      // sum char codes, weight vowels slightly
+      let sum = 0;
+      for(let ch of name){
+        const code = ch.charCodeAt(0);
+        sum += code % 29; // keep numbers small and varied
+        if('aeiouáéíóúâêîôû'.includes(ch)) sum += 3;
+      }
+      // also include length influence
+      sum += Math.min(20, name.length * 2);
+      return sum;
+    }
+
+    function computeCompatibility(maleName, femaleName, relation){
+      const a = nameScore(maleName);
+      const b = nameScore(femaleName);
+      // combine and normalize
+      let raw = (a * 1.1 + b * 0.9) % 100;
+      // mix in an ascii cross influence
+      let cross = 0;
+      const minLen = Math.min(maleName.length, femaleName.length);
+      for(let i=0;i<minLen;i++){
+        cross += Math.abs(maleName.charCodeAt(i) - femaleName.charCodeAt(i));
+      }
+      raw = (raw + (cross % 37)) % 100;
+
+      // relation bias (for fun): pacar slightly higher, kakak-adik lower, teman neutral, saudara lower
+      const biasMap = { 'pacar': +8, 'kakak-adik': -20, 'teman': -2, 'saudara': -12 };
+      const bias = biasMap[relation] || 0;
+      let final = Math.round(Math.max(0, Math.min(100, raw + bias)));
+      return final;
+    }
+
+    function messageFromScore(score, relation){
+      if(relation === 'kakak-adik'){
+        if(score > 65) return 'Wah, hubungan kuat sebagai saudara — penuh rasa sayang!';
+        if(score > 35) return 'Akrab dan saling mendukung — hubungan keluarga yang hangat.';
+        return 'Namanya keluarga — kasih sayang tak diukur angka. Tetap sayang ya!';
+      }
+      if(score >= 90) return 'Kompatibilitas maksimal — chemistry nyata! ❤️';
+      if(score >= 75) return 'Pasangan sangat cocok — ada banyak kecocokan.';
+      if(score >= 50) return 'Cukup cocok — butuh usaha untuk makin dekat.';
+      if(score >= 30) return 'Perlu kerja sama lebih — bisa jadi petualangan menarik.';
+      return 'Wah, terlihat menantang — yang penting saling menghargai.';
+    }
+
+    function animateResult(score){
+      percentEl.textContent = score + '%';
+      meterFill.style.width = '0%';
+      // animate to value
+      setTimeout(()=>{
+        meterFill.style.width = score + '%';
+      },50);
+    }
+
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const m = maleInput.value.trim();
+      const f = femaleInput.value.trim();
+      if(!m || !f){
+        alert('Mohon isi kedua nama.');
+        return;
+      }
+      const score = computeCompatibility(m,f,chosenRelation);
+      animateResult(score);
+      pairLabel.textContent = `${m} ❤️ ${f}`;
+      relationLabel.textContent = chosenRelation.replace('-', ' & ');
+      messageEl.textContent = messageFromScore(score, chosenRelation);
+      // Add subtle confetti (tiny) — not heavy
+      showTinyConfetti(score);
+    });
+
+    resetBtn.addEventListener('click', ()=>{
+      form.reset();
+      options.forEach(o=>o.classList.remove('active'));
+      options[0].classList.add('active');
+      chosenRelation = 'pacar';
+      pairLabel.textContent = '-';
+      relationLabel.textContent = '-';
+      percentEl.textContent = '--%';
+      meterFill.style.width = '0%';
+      messageEl.textContent = 'Ayo mulai tes — masukkan nama di kiri.';
+    });
+
+    copyBtn.addEventListener('click', async ()=>{
+      const text = `${pairLabel.textContent} — ${percentEl.textContent} — ${messageEl.textContent}`;
+      try{
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = 'Disalin!';
+        setTimeout(()=> copyBtn.textContent = 'Salin Hasil',1200);
+      }catch(err){
+        alert('Tidak bisa menyalin di browser ini.');
+      }
+    });
+
+    shareBtn.addEventListener('click', async ()=>{
+      const text = `Love Tester: ${pairLabel.textContent} = ${percentEl.textContent} — ${messageEl.textContent}`;
+      if(navigator.share){
+        try{ await navigator.share({title:'Love Tester', text}); }
+        catch(e){}
+      }else{
+        alert('Fitur berbagi tidak tersedia di perangkat ini. Silakan salin hasil.');
+      }
+    });
+
+    // tiny confetti effect — lightweight
+    function showTinyConfetti(score){
+      if(score < 40) return; // only celebrate decent scores
+      const root = document.createElement('div');
+      root.style.position='fixed';root.style.left=0;root.style.top=0;root.style.width='100%';root.style.height='100%';root.style.pointerEvents='none';
+      document.body.appendChild(root);
+      for(let i=0;i<18;i++){
+        const dot = document.createElement('div');
+        dot.style.position='absolute';dot.style.width='10px';dot.style.height='10px';dot.style.borderRadius='4px';
+        dot.style.left=(50+ (Math.random()-0.5)*60)+'%';dot.style.top=(30+ Math.random()*20)+'%';
+        dot.style.opacity='0.95';
+        dot.style.transform = `translateY(0) rotate(${Math.random()*360}deg)`;
+        dot.style.background = `linear-gradient(90deg, rgba(255,107,138,0.95), rgba(138,77,255,0.95))`;
+        root.appendChild(dot);
+        const dur = 900 + Math.random()*900;
+        dot.animate([
+          { transform: `translateY(0) scale(1)`, opacity:1 },
+          { transform: `translateY(${150 + Math.random()*200}px) rotate(${Math.random()*720}deg) scale(0.6)`, opacity:0 }
+        ],{duration:dur, easing:'cubic-bezier(.2,.9,.3,.9)'});
+        setTimeout(()=> dot.remove(), dur+80);
+      }
+      setTimeout(()=> root.remove(), 2200);
+    }
+
+    // initialize
+    (function(){
+      meterFill.style.width='0%';
+      pairLabel.textContent='-';
+      relationLabel.textContent='-';
+    })();
+  </script>
+</body>
+</html>
